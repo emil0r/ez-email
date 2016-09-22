@@ -1,8 +1,7 @@
 (ns ez-email.core
-  (:require [clojure.core.async :refer [go chan close! <! >!]]
+  (:require [clojure.core.async :as async :refer [go chan close! <! >!]]
             [clojure.string :as str]
-            [postal.core :as postal]
-            [slingshot.slingshot :refer [try+ throw+]]))
+            [postal.core :as postal]))
 
 
 (defonce ^:private channel (atom nil))
@@ -12,10 +11,10 @@
   (send-message [provider message]))
 
 (extend-type nil
-  IMessage
+  IProvider
   (send-message [this _]
-    (throw+ {:what ::send-message
-             :message "Tried to send a message on nil"})))
+    (throw (ex-info "Tried to send a message on nil"
+                    {:what ::send-message}))))
 
 (defrecord PostalProvider [host port user password ssl? mime from postal c-in c-result]
   IProvider
@@ -23,7 +22,7 @@
     (let [result (postal/send-message (:postal this)
                                       (merge {:from from}
                                              message))]
-      (message-sent provider this result)))
+      (message-sent this message result)))
   (message-sent [this message result]
     (go (>! c-result {:message message
                       :result result}))))
