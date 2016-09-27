@@ -1,4 +1,4 @@
-(defproject ez-email "0.1.0-SNAPSHOT"
+(defproject ez-email "0.1.0"
   :description "Easy email handling"
   :url "https://github.com/emil0r/ez-email"
   :license {:name "Eclipse Public License"
